@@ -1,0 +1,137 @@
+%{
+	#include "tokens.h"
+	#include "hash.h"
+	int running = 1;
+	int lineNumber = 1;
+	void initMe();
+	int getLineNumber();
+	#include "main.c"
+%}
+
+%x 		COMMENT
+%x 		COMMENT2
+%%
+
+\n	{lineNumber++;}
+
+word	{return KW_WORD;}   
+
+bool 	{return KW_BOOL;}
+
+byte	{return KW_BYTE;}       
+
+if	{return KW_IF;}         
+
+then 	{return KW_THEN;}       
+
+else 	{return KW_ELSE;}       
+
+loop	{return KW_LOOP;}       
+
+input 	{return KW_INPUT;}      
+
+return	{return KW_RETURN;}     
+
+output  {return	KW_OUTPUT;}  
+
+true		{ if(hashFind(yytext) == NULL) 
+		   {
+		      hashInsert(yytext,LIT_TRUE);
+		      return LIT_TRUE;
+		   }
+		   else
+		     return LIT_TRUE;
+		}
+
+false		{ if(hashFind(yytext) == NULL) 
+		   {
+		      hashInsert(yytext,LIT_FALSE);
+		      return LIT_FALSE;
+		   }
+		   else
+		     return LIT_FALSE;
+
+		}   
+"<=" 	{return OPERATOR_LE;}   
+
+">="	{return OPERATOR_GE;}   
+
+"==" 	{return OPERATOR_EQ;}  
+
+"!=" 	{return OPERATOR_NE;}   
+
+"&&" 	{return OPERATOR_AND;}  
+
+"||" 	{return OPERATOR_OR;} 
+  
+[-+*/,;:&<>=$\(\)!\[\]\{\}] {return yytext[0];}
+
+
+[ \t]			{}
+
+
+[0-9][A-Za-z_][A-Za-z0-9_]*  { if(hashFind(yytext) == NULL)
+			      {
+				hashInsert(yytext,TK_IDENTIFIER);
+				return TK_IDENTIFIER;
+			      }
+			      else
+				return TK_IDENTIFIER;
+			    }
+
+[0-9][A-Fa-f0-9]* { if(hashFind(yytext) == NULL) 
+		   {
+		      hashInsert(yytext,LIT_INTEGER);
+		      return LIT_INTEGER;
+		   }
+		   else
+		     return LIT_INTEGER;
+		  }
+
+
+
+'(\\.|[^\\'])+\'  { if(hashFind(yytext) == NULL) 
+		   {
+		      hashInsert(yytext,LIT_CHAR);
+		      return LIT_CHAR;
+		   }
+		   else
+		     return LIT_CHAR;
+		}
+
+
+\"(\\.|[^\\"])*\"  { if(hashFind(yytext) == NULL) 
+		     {
+		        hashInsert(yytext,LIT_STRING);
+		        return LIT_STRING;
+		     }
+		     else
+		       return LIT_STRING;
+		    }
+"/*" 		BEGIN(COMMENT);
+<COMMENT>.	{ }
+<COMMENT>"\n"	{++lineNumber;}
+<COMMENT>"*/"	BEGIN(INITIAL);
+
+"//"		BEGIN(COMMENT2);
+<COMMENT2>.	{ }
+<COMMENT2>[\n]	++lineNumber;BEGIN(INITIAL);
+
+.	{return TOKEN_ERROR;}
+
+%%
+
+int yywrap()
+{
+	running = 0;
+	return 1;
+}
+void initMe()
+{
+	hashInit();
+}
+
+int getLineNumber()
+{
+	return lineNumber;
+}

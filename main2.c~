@@ -1,0 +1,24 @@
+#include <stdio.h>
+
+int yylex();
+extern char *yytext;
+extern int running;
+extern FILE *yyin;
+
+
+extern int running;
+void initMe(void);
+
+int main(int argc, char** argv)
+  {
+	initMe();
+int s = yylex();
+yyin = fopen("out.c","r");
+    while(running != 0) 
+    {
+	s = yylex();
+    	printf("linha %d token %d\n", lineNumber, s);
+    }
+    hashPrint();
+    return 0;
+  }

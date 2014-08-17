@@ -1,0 +1,6 @@
+1 'a' 'a' 1sjakjsskaj 321 klk "klkas" 's'
+2_
+01
+0_A
+'a' 'a' "sjahjsahsjashj" 'a'
+lsasjaks_1oiodjkj 2a 2A 2A

@@ -1,0 +1,70 @@
+#include "hash.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+HASH_NODE* Table[HASH_SIZE];
+
+void hashInit(void)
+{
+	int i;
+	for (i=0; i< HASH_SIZE; ++i);
+		Table[i] = 0;
+}
+
+int hashAddress(char* text)
+{
+	int address = 1;
+	int i = 0;
+	
+	for (i=0; i < strlen(text); ++i)
+		address = ((address * text [i]) % HASH_SIZE) + 1;
+	return address-1;	
+}
+
+HASH_NODE* hashInsert(char* text, int type)
+{
+	HASH_NODE* node;
+	int address = hashAddress(text);
+	node = (HASH_NODE*) calloc (1, sizeof(HASH_NODE));
+	node->type = type;
+	node->text = (char*) calloc (strlen(text)+1, sizeof(char));
+	strcpy(node->text, text);
+	node->next = Table[address];
+	Table[address] = node;
+	return node;
+}
+
+void hashPrint(void)
+{
+	int i;
+	HASH_NODE* node;
+	for(i=0; i<HASH_SIZE; ++i)
+		for (node = Table[i]; node; node = node->next)
+		{			
+			printf("id[%d] node %d : %s \n", i,node->type,node->text);
+		}
+
+	printf ("\n");
+}
+
+HASH_NODE* hashFind (char* text)
+{
+	int address = hashAddress(text);
+	int found = 0;	
+	HASH_NODE* node;
+
+	for(node = Table[address];node;node = node->next)
+	{
+		if (strcmp(node->text,text) == 0)
+		{
+			found = 1;
+			break;	
+		}		
+	}
+
+	if (found == 1)
+		return node;
+	else
+		return NULL;
+}
